@@ -1,33 +1,42 @@
 ﻿using Xunit;
+using Xunit.Abstractions;
 
 namespace GameEngine.Tests
 {
-    public class GameStateShould
+    public class GameStateShould : IClassFixture<GameStateFixture>
     {
-        private readonly GameState _sut;
+        private readonly GameStateFixture _gameStateFixture;
+        private readonly ITestOutputHelper _output;
         private readonly PlayerCharacter playerCharacter1;
         private readonly PlayerCharacter playerCharacter2;
         
-        public GameStateShould()
-        {            
-            _sut = new GameState();
+        
+        public GameStateShould(GameStateFixture gameStateFixture, ITestOutputHelper output)
+        {
+            _gameStateFixture = gameStateFixture;
+
+            _output = output;
+
             playerCharacter1 = new PlayerCharacter();
             playerCharacter2 = new PlayerCharacter();
+
             AddPlayersToTheWorld();
         }
 
         private void AddPlayersToTheWorld()
-        {            
-            _sut.Players.Add(playerCharacter1);
-            _sut.Players.Add(playerCharacter2);
+        {
+            _gameStateFixture.GameState.Players.Add(playerCharacter1);
+            _gameStateFixture.GameState.Players.Add(playerCharacter2);
         }
 
         [Fact]
         public void DamageAllPlayersWhenEarthquake()
         {
+            _output.WriteLine($"GameState ID={_gameStateFixture.GameState.Id}");
+
             int expectedHealthAfterEarthquake = playerCharacter1.Health - GameState.EarthquakeDamage;
 
-            _sut.Earthquake();
+            _gameStateFixture.GameState.Earthquake();
 
             Assert.Equal(expectedHealthAfterEarthquake, playerCharacter1.Health);
             Assert.Equal(expectedHealthAfterEarthquake, playerCharacter2.Health);
@@ -35,9 +44,11 @@ namespace GameEngine.Tests
         [Fact]
         public void Reset()
         {
-            _sut.Reset();
+            _output.WriteLine($"GameState ID={_gameStateFixture.GameState.Id}");
 
-            Assert.Empty(_sut.Players);
+            _gameStateFixture.GameState.Reset();
+
+            Assert.Empty(_gameStateFixture.GameState.Players);
         }
     }
 }
