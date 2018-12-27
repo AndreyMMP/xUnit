@@ -1,140 +1,122 @@
 using System;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace GameEngine.Tests
 {
-    public class PlayerCharacterShould
+    public class PlayerCharacterShould : IDisposable
     {
+        private readonly PlayerCharacter _sut; // system under test
+        private readonly ITestOutputHelper _output;
+        public PlayerCharacterShould(ITestOutputHelper output)
+        {
+            _output = output;
+
+            _output.WriteLine("Criando um novo Player Character");
+
+            _sut = new PlayerCharacter();
+        }
+
+        public void Dispose()
+        {
+            _output.WriteLine($"Fazendo dispose de Player Character {_sut.FullName}");
+
+            //_sut.Dispose();
+        }
+
         [Fact]
         public void BeInexperiencedWhenNew()
         {
-            // system under test
-            PlayerCharacter sut = new PlayerCharacter();
-
-            Assert.True(sut.IsNoob);
+            Assert.True(_sut.IsNoob);
         }
         [Fact]
         public void CalculateFullName()
         {
-            PlayerCharacter sut = new PlayerCharacter
-            {
-                FirstName = "Andrey",
-                LastName = "Pinto"
-            };
+            _sut.FirstName = "Andrey";
+            _sut.LastName = "Pinto";
 
-            Assert.Equal("Andrey Pinto", sut.FullName);
+            Assert.Equal("Andrey Pinto", _sut.FullName);
         }
         [Fact]
         public void HaveFullNameStartingWithFirstName()
         {
-            PlayerCharacter sut = new PlayerCharacter
-            {
-                FirstName = "Andrey",
-                LastName = "Pinto"
-            };
+            _sut.FirstName = "Andrey";
+            _sut.LastName = "Pinto";
 
-            Assert.StartsWith("Andrey", sut.FullName);
+            Assert.StartsWith("Andrey", _sut.FullName);
         }
         [Fact]
         public void HaveFullNameEndingWithLastName()
         {
-            PlayerCharacter sut = new PlayerCharacter
-            {
-                FirstName = "Andrey",
-                LastName = "Pinto"
-            };
+            _sut.FirstName = "Andrey";
+            _sut.LastName = "Pinto";
 
-            Assert.EndsWith("Pinto", sut.FullName);
+            Assert.EndsWith("Pinto", _sut.FullName);
         }
         [Fact]
         public void CalculateFullName_IgnoreCaseAssert()
         {
-            PlayerCharacter sut = new PlayerCharacter
-            {
-                FirstName = "ANDREY",
-                LastName = "PINTO"
-            };
+            _sut.FirstName = "ANDREY";
+            _sut.LastName = "PINTO";
 
-            Assert.Equal("Andrey Pinto", sut.FullName, ignoreCase: true);
+            Assert.Equal("Andrey Pinto", _sut.FullName, ignoreCase: true);
         }
-        [Fact(Skip = "Não é necessário executar pois foi somente teste de funcionalidade do xUnit")]
+        [Fact]
         public void CalculateFullName_SubstringAssert()
         {
-            PlayerCharacter sut = new PlayerCharacter
-            {
-                FirstName = "Andrey",
-                LastName = "Pinto"
-            };
+            _sut.FirstName = "Andrey";
+            _sut.LastName = "Pinto";
 
-            Assert.Contains("rey Pin", sut.FullName);
+            Assert.Contains("rey Pin", _sut.FullName);
         }
         [Fact]
         public void CalculateFullNameWithTitleCase()
         {
-            PlayerCharacter sut = new PlayerCharacter
-            {
-                FirstName = "Andrey",
-                LastName = "Pinto"
-            };
+            _sut.FirstName = "Andrey";
+            _sut.LastName = "Pinto";
 
-            Assert.Matches("[A-Z]{1}[a-z]+ [A-Z]{1}[a-z]+", sut.FullName);
+            Assert.Matches("[A-Z]{1}[a-z]+ [A-Z]{1}[a-z]+", _sut.FullName);
         }
         [Fact]
         public void StartWithDefaultHealth()
         {
-            PlayerCharacter sut = new PlayerCharacter();
-
-            Assert.Equal(100, sut.Health);
+            Assert.Equal(100, _sut.Health);
         }
         [Fact]
         public void StartWithDefaultHealth_NotEqualAssert()
         {
-            PlayerCharacter sut = new PlayerCharacter();
-
-            Assert.NotEqual(0, sut.Health);
+            Assert.NotEqual(0, _sut.Health);
         }
         [Fact]
         public void IncreaseHealthAfterSleeping()
         {
-            PlayerCharacter sut = new PlayerCharacter();
+            _sut.Sleep();
 
-            sut.Sleep();
-
-            Assert.InRange(sut.Health, 101, 200);
+            Assert.InRange(_sut.Health, 101, 200);
         }
         [Fact]
         public void NotHaveNicknameByDefault()
         {
-            PlayerCharacter sut = new PlayerCharacter();
-
-            Assert.Null(sut.Nickname);
+            Assert.Null(_sut.Nickname);
         }
         [Fact]
         public void HaveLongBow()
         {
-            PlayerCharacter sut = new PlayerCharacter();
-
-            Assert.Contains("Long Bow", sut.Weapons);
+            Assert.Contains("Long Bow", _sut.Weapons);
         }
         [Fact]
         public void NotHaveStaffOfWonder()
         {
-            PlayerCharacter sut = new PlayerCharacter();
-
-            Assert.DoesNotContain("Staff Of Wonder", sut.Weapons);
+            Assert.DoesNotContain("Staff Of Wonder", _sut.Weapons);
         }
         [Fact]
         public void HaveAtLeastOneKindOfSword()
         {
-            PlayerCharacter sut = new PlayerCharacter();
-
-            Assert.Contains(sut.Weapons, weapon => weapon.Contains("Sword"));
+            Assert.Contains(_sut.Weapons, weapon => weapon.Contains("Sword"));
         }
         [Fact]
         public void HaveAllExpectedWeapons()
         {
-            PlayerCharacter sut = new PlayerCharacter();
-
             var expectedWeapons = new[]
             {
                 "Long Bow",
@@ -142,31 +124,25 @@ namespace GameEngine.Tests
                 "Short Sword",
             };
 
-            Assert.Equal(expectedWeapons, sut.Weapons);
+            Assert.Equal(expectedWeapons, _sut.Weapons);
         }
         [Fact]
         public void HaveNoEmptyDefaultWeapons()
         {
-            PlayerCharacter sut = new PlayerCharacter();
-
-            Assert.All(sut.Weapons, weapon => Assert.False(string.IsNullOrWhiteSpace(weapon)));
+            Assert.All(_sut.Weapons, weapon => Assert.False(string.IsNullOrWhiteSpace(weapon)));
         }
         [Fact]
         public void RaiseSleptEvent()
         {
-            PlayerCharacter sut = new PlayerCharacter();
-
             Assert.Raises<EventArgs>(
-                handler => sut.PlayerSlept += handler,
-                handler => sut.PlayerSlept -= handler,
-                () => sut.Sleep());
+                handler => _sut.PlayerSlept += handler,
+                handler => _sut.PlayerSlept -= handler,
+                () => _sut.Sleep());
         }
         [Fact]
         public void RaisePropertyChangedEvent()
         {
-            PlayerCharacter sut = new PlayerCharacter();
-
-            Assert.PropertyChanged(sut, "Health", () => sut.TakeDamage(10));
+            Assert.PropertyChanged(_sut, "Health", () => _sut.TakeDamage(10));
         }
     }
 }
