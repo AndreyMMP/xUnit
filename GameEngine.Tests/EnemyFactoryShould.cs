@@ -1,10 +1,12 @@
-﻿using Xunit;
+﻿using System;
+using Xunit;
 
 namespace GameEngine.Tests
 {
+    [Trait("Category", "Enemy")]
     public class EnemyFactoryShould
     {
-        [Fact]
+        [Fact]        
         public void CreateNormalEnemyByDefault()
         {
             EnemyFactory sut = new EnemyFactory();
@@ -51,6 +53,23 @@ namespace GameEngine.Tests
             Enemy enemy2 = sut.Create("Zombie");
 
             Assert.NotSame(enemy1, enemy2);
+        }
+        [Fact]
+        public void NotAllowNullName()
+        {
+            EnemyFactory sut = new EnemyFactory();
+
+            Assert.Throws<ArgumentNullException>("name", () => sut.Create(null));
+        }
+        [Fact]
+        public void OnlyAllowKingOrQueenBossEnemies()
+        {
+            EnemyFactory sut = new EnemyFactory();
+
+            EnemyCreationException enemyCreationException = 
+                Assert.Throws<EnemyCreationException>(() => sut.Create("Zombie", true));
+
+            Assert.Equal("Zombie", enemyCreationException.RequestedEnemyName);
         }
     }
 }
